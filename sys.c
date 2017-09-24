@@ -31,7 +31,13 @@ SYSCALL_DEFINE2(procstat, int, PID, struct proc_stat*, proccc)
 	long e = kernel.rt_priority;
 	printk(KERN_WARNING "RT PRIORITY = %ld \n", e);
 
-	//kernel.policy = find_task_by_pid_ns(PID, &init_pid_ns)->policy
-	
+	kernel.policy = find_task_by_pid_ns(PID, &init_pid_ns)->policy;
+	long f = kernel.policy;
+	printk(KERN_WARNING "POLICY = %ld \n", f);
+
+	struct sched_rt_entity temp = find_task_by_pid_ns(PID, &init_pid_ns)->rt;
+	kernel.time_slice = temp.time_slice;
+	int g = kernel.time_slice;
+	printk(KERN_WARNING "TIME SLICE = %d \n", g);
 	return 0;	
 }
