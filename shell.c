@@ -5,6 +5,8 @@
 #include <sys/wait.h>
 
 
+
+
 //struct line
 //{
 //	char
@@ -15,6 +17,7 @@ int main()
 	char history[10][100];
 	char input[100];
 	int counter = 0;
+	int words = 0;
 	while(1)
 	{
 		printf("msh:[%d]:>", counter);
@@ -68,14 +71,27 @@ int main()
 				token_count ++;
 			}
 
+			
+
 			break;
 			
 		}
 
 		counter++;
-
-
+		char *fin;
 		int i;
+		
+		//sizeof(input_to_exec);
+		
+		for(i = 0; i < token_count-1; i++)
+		{
+			if(input_to_exec[i] != NULL){words++;}
+
+			else{continue;}
+		}	
+		printf("#######		# of words in command = %d	########", words);
+
+		words = 0;
 		for(i = 0; i < token_count-1; i++)
 		{
 			printf("\n%s\n", input_to_exec[i]);
@@ -100,14 +116,14 @@ int main()
 			strcpy(input_to_exec[i], "\0");// = "\0";
 		}
 
-		if (counter >= 10)
+		if (counter > 5)
 		{
 			int i;
 			for(i = 0; i < counter; i++)
 			{
 				printf("\n [%d] = %s", i, history[i]);
 			}
-			counter = 0;
+			counter = words = 0;
 		}
 
 		
