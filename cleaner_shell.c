@@ -11,15 +11,18 @@
 #include <sys/wait.h>
 
 
+#define MAX_HISTORY 5;
+
 int main()
 {
 	//2-D array to keep track of the last 10 commands by the user
 	//every command is stored in input
 	//counter to keep track of the index of the command (0 <= counter <= 9)
-	
+	//counter_h to keep track of the history
 	char history[10][100];
 	char input[100];
 	int counter = 0;
+	int counter_h = 0;
 
 	//run forever *
 	while(1)
@@ -77,13 +80,17 @@ int main()
 		
 		//increase the counter for history
 		counter++;
-		
+
+		if (counter_h < 5)
+		{
+			counter_h++;
+		}
 		int i;
 		
 
 		if(strcmp("history", fin[0]) == 0)
 		{
-			for(i = 0; i < counter; i++){printf("[%d] %s", i, history[i]);}
+			for(i = 0; i < counter_h; i++){printf("[%d] %s", i, history[i]);}
 		}
 		
 		char n[2];
