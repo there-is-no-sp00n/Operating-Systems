@@ -9,9 +9,10 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <ctype.h>
 
 
-#define MAX_HISTORY 5;
+//#define MAX_HISTORY 5;
 
 int main()
 {
@@ -23,6 +24,7 @@ int main()
 	char input[100];
 	int counter = 0;
 	int counter_h = 0;
+	int max_history = 5;
 
 	//run forever *
 	while(1)
@@ -32,7 +34,21 @@ int main()
 		//checking to see whether or not fgets() failed
 		if(fgets(input, 100, stdin))
 		{
-			if (strcmp(input, " \n") == 0){continue;}
+			char *temp = input;
+
+			int flag;
+			while (*temp != '\0')
+			{
+				if(isspace(*temp)){flag = 1;}
+				else
+				{
+					flag = 0;
+					break;
+				}
+				temp++;
+			}
+
+			if (flag == 1){continue;}
 		}
 
 		else
@@ -61,13 +77,13 @@ int main()
 		
 		while(1)
 		{
-			token = strtok(input, " \n");
+			token = strtok(input, " \n\t");
 			
 			
 			while(token != NULL)
 			{
 				fin[token_count-1] = token;
-				token = strtok(NULL, " \n");
+				token = strtok(NULL, " \n\t");
 				token_count++;
 			}
 
@@ -81,7 +97,7 @@ int main()
 		//increase the counter for history
 		counter++;
 
-		if (counter_h < 5)
+		if (counter_h < max_history)
 		{
 			counter_h++;
 		}
@@ -153,7 +169,7 @@ int main()
 		waitpid(child_pid, &status, 0);
 		
 
-		if (counter > 5)
+		if (counter == max_history)
 		{
 			int i;
 			for(i = 0; i < counter; i++)
