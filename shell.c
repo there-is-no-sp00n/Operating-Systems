@@ -1,16 +1,9 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
 
-
-
-
-//struct line
-//{
-//	char
-//};
 
 int main()
 {
@@ -31,7 +24,7 @@ int main()
 		//checking to see whether or not fgets() failed
 		if(fgets(input, 100, stdin))
 		{
-			printf("WORKED! input is %s \n", input);
+			//printf("WORKED! input is %s \n", input);
 		}
 
 		else
@@ -57,7 +50,7 @@ int main()
 		char input_to_exec[5][100];
 		char *fin[11];
 		
-		
+		//keep track of how many words per line
 		int token_count = 1;
 		
 		while(1)
@@ -68,10 +61,10 @@ int main()
 			while(token != NULL)
 			{
 				fin[token_count-1] = token;
-				printf("pos = %d \n", token_count -1);
+				//printf("pos = %d \n", token_count -1);
 				printf("= %s\n", token);
 				strcpy(input_to_exec[token_count - 1], token);
-				printf("== %s\n", token);
+				//printf("== %s\n", token);
 				token = strtok(NULL, " \n");
 				token_count++;
 			}
@@ -94,7 +87,7 @@ int main()
 
 			else{continue;}
 		}	
-		printf("#######		# of words in command = %d	########", words);
+		//printf("#######		# of words in command = %d	########", words);
 
 		words = 0;
 		for(i = 0; i < token_count; i++)
@@ -120,7 +113,7 @@ int main()
 		
 		for(i = 0; i < token_count-1; i++)
 		{
-			printf("jjkk\n%s\n", input_to_exec[i]);
+			//printf("jjkk\n%s\n", input_to_exec[i]);
 			strcpy(input_to_exec[i], "\0");
 		}
 
@@ -135,7 +128,6 @@ int main()
 		}
 
 		
-
 	}
 
 	
