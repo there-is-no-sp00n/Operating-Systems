@@ -69,13 +69,14 @@ int main()
 				token_count++;
 			}
 
-
+			//last item should always be NULL
 			fin[token_count-1] = NULL;
 
 			break;
 			
 		}
-
+		
+		//increase the counter for history
 		counter++;
 		
 		int i;
@@ -100,6 +101,19 @@ int main()
 		
 		pid_t child_pid = fork();
 		int status;
+
+		if(child_pid > 0)
+		{
+			if(strcmp("cd", fin[0]) == 0)
+			{
+		                int cd_check = chdir(fin[1]);
+				if(cd_check == -1){printf("%s: No such file in directory\n", fin[1]);}
+				else if(cd_check == 0){printf("the d has changed\n");}
+			}
+
+			waitpid(child_pid, &status, 0);
+
+		}
 		
 		if(child_pid == 0)
 		{
@@ -107,6 +121,8 @@ int main()
 			execvp(fin[0], fin);	
 			exit(EXIT_SUCCESS);
 		}
+
+		
 		waitpid(child_pid, &status, 0);
 		
 		
