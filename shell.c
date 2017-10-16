@@ -1,35 +1,84 @@
+/*
+	Name: Aninda Aminuzzaman
+	ID:   1001018367
+*/
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <ctype.h>
+
+
 
 
 int main()
 {
-	//2-D array to keep track of the last 10 commands by the user
-	//every command is stored in input
+	//2-D array to keep track of the last 15 commands by the user
+	//every command from the user is stored in input
 	//counter to keep track of the index of the command (0 <= counter <= 9)
-	//words for how many words/tokens in the command
-	char history[10][100];
+	//counter_h to keep track of the history
+	//max_history represents max amount of items in history 
+	char history[15][100];
 	char input[100];
 	int counter = 0;
-	int words = 0;
+	int counter_h = 0;
+	int max_history = 15;
 
 	//run forever *
 	while(1)
 	{
-		printf("msh:[%d]:>", counter);
+		printf("msh:[%d]:> ", counter);
 		
 		//checking to see whether or not fgets() failed
 		if(fgets(input, 100, stdin))
 		{
-			//printf("WORKED! input is %s \n", input);
+			//this temp is for checking whether or not the input is solely consisting of whitespace
+			char *temp = input;
+			
+			//flag to keep count of whether or not a non-whitespace character is encountered
+			int flag;
+			//keep on running until null terminating character is encountered
+			while (*temp != '\0')
+			{
+				//isspace function returns true if it encounters a whitespace character
+				if(isspace(*temp))
+				{
+					//set flag to 1 if whitespace is encountered
+					flag = 1;
+				}
+
+				else
+				{	
+					/*  
+					    set flag to 0 and instantly break out of the loop 
+					    because a non-whitespace character is encountered
+					*/
+					flag = 0;
+					break;
+				}
+				//increment temp to go check the next character in the input
+				temp++;
+			}
+			
+			/*
+			    if flag is 1 after the loop exits, that means that
+			    the input string only consists of whitespace characters
+			    this means that we don't go forward in the program
+			    must run loop from beginning
+			*/
+			if (flag == 1)
+			{
+				continue;
+			}
 		}
 
 		else
 		{
-			printf("fgets failed\n");
+			//if fgets() failed then run the loop from beginning
+			continue;
 		}
 
 
@@ -44,105 +93,164 @@ int main()
 		strcpy(history[counter], input);
 
 		//token is for strtok()
-		//input_to_exec keeps store of the words in every command
-		//look into the part where i add to input_to_exec and see if i can add to a char *array		
+		//fin has the input that goes into execvp()	
 		char *token;
-		char input_to_exec[5][100];
 		char *fin[11];
 		
 		//keep track of how many words per line
 		int token_count = 1;
 		
+		//this loop to iterate through the input string and find words
 		while(1)
-		{
-			token = strtok(input, " \n");
+		{	
+			//get the first word
+			token = strtok(input, " \n\t");
 			
-			
+			//while token is not null, keep iterating through the input
 			while(token != NULL)
 			{
+				//this populates the input that goes into execvp()
 				fin[token_count-1] = token;
-				//printf("pos = %d \n", token_count -1);
-				printf("= %s\n", token);
-				strcpy(input_to_exec[token_count - 1], token);
-				//printf("== %s\n", token);
-				token = strtok(NULL, " \n");
+				//go find the next word
+				//NULL is passed because something about strtok() maintaining a static pointer
+				// to the previous string that was passed
+				token = strtok(NULL, " \n\t");
 				token_count++;
 			}
 
 			//last item should always be NULL
 			fin[token_count-1] = NULL;
 
+			//break out of the loop after the input is iterated through and converte into words
 			break;
 			
+			/*
+				maybe i didn't need this while loop...
+			*/
 		}
 		
 		//increase the counter for history
 		counter++;
 		
+		//counter_h is incremented to 14 and stays there
+		if (counter_h < max_history)
+		{
+			counter_h++;
+		}
 		int i;
 		
+		//if the user input was "history" then print everything in history
+		if(strcmp("history", fin[0]) == 0)
+		{
+			for(i = 0; i < counter_h; i++)
+			{
+				printf("[%d]: %s\n", i, history[i]);
+			}
+		}
 		
-		for(i = 0; i < token_count-1; i++)
+		//this char array to hold if the first character is '!'
+		char n[4];
+		//copy the first character
+		strcpy(n, fin[0]);
+		
+		
+		//if the first character equals 33, the ASCII value for '!'
+		if(n[0] == 33)
 		{
-			if(input_to_exec[i] != NULL){words++;}
+			char num[3];
+			//populate with numbers
+			num[0] = n[1];
+			num[1] = n[2];
+			num[2] = n[3];
+			//convert to int	
+			int m_int = atoi(num);
+			
+			//if the choice is less than 15(or what counter_h is) and 0 or above
+			//run the function from history again
+			if(m_int < counter_h && m_int >= 0)
+			{
+				//this is from above with the new input from history
+				strcpy(input, history[m_int]);
+				token = strtok(input, " \t\n");
+				token_count = 1;
+				while(token != NULL)
+				{
+					fin[token_count-1] = token;
+					token = strtok(NULL, " \t\n");
+					token_count++;
+				}
 
-			else{continue;}
-		}	
-		//printf("#######		# of words in command = %d	########", words);
+				fin[token_count-1] = NULL;
+			}
+			else
+			{
+				printf("Command not in history!\n");
+				continue;
+			}
 
-		words = 0;
-		for(i = 0; i < token_count; i++)
-		{
-			printf("\n%s\n", input_to_exec[i]);
-			printf("fin[%d] = %s \n",i, fin[i]);
+			//if the user input was "history" from the history then print everything in history
+			if(strcmp("history", fin[0]) == 0)
+			{
+				for(i = 0; i < counter_h; i++)
+				{
+					printf("[%d]: %s\n", i, history[i]);
+				}
+			}
 		}
 
+			
 		
-		
+		//make a process
 		pid_t child_pid = fork();
 		int status;
 
-		if(child_pid > 0)
+		//if in parent run cd
+		if (child_pid > 0)
 		{
 			if(strcmp("cd", fin[0]) == 0)
 			{
 		                int cd_check = chdir(fin[1]);
-				if(cd_check == -1){printf("%s: No such file in directory\n", fin[1]);}
-				else if(cd_check == 0){printf("the d has changed\n");}
+				//if cd fails give output
+				if(cd_check == -1)
+				{
+					printf("%s: No such file in directory\n", fin[1]);
+				}
 			}
-
+			//wait to finish
 			waitpid(child_pid, &status, 0);
 
 		}
 		
+		//if in child check to see if execvp() failed and its not "cd" or "history"
+		else if(child_pid == 0)
+		{
+			execvp(fin[0], fin);
+			if((execvp(fin[0], fin) == -1) && (strcmp(fin[0], "cd") != 0) && (strcmp(fin[0], "history") != 0))
+			{	
+				printf("%s: command not found.\n", fin[0]);
+			}
+		}
+		
+		//wait to finish
+		waitpid(child_pid, &status, 0);	
+		
+		
+		//here run all other input
 		if(child_pid == 0)
 		{
-			//execl("/bin/ls",input_to_exec[0], NULL);
 			execvp(fin[0], fin);	
 			exit(EXIT_SUCCESS);
 		}
 
-		
+		//wait to finish
 		waitpid(child_pid, &status, 0);
 		
 		
-		
-		for(i = 0; i < token_count-1; i++)
+		//reset counter to 0 because we want to go back to top of history 		
+		if (counter == max_history)
 		{
-			//printf("jjkk\n%s\n", input_to_exec[i]);
-			strcpy(input_to_exec[i], "\0");
+			counter = 0;
 		}
-
-		if (counter > 5)
-		{
-			int i;
-			for(i = 0; i < counter; i++)
-			{
-				printf("\n [%d] = %s", i, history[i]);
-			}
-			counter = words = 0;
-		}
-
 		
 	}
 
