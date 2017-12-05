@@ -127,7 +127,7 @@ int main()
 			
 		}
 
-		printf("words/line %d\n", token_count);
+		//printf("words/line %d\n", token_count);
 
 		token_count = 0;
 		
@@ -139,8 +139,8 @@ int main()
 				if(fat_32 = fopen(fin[1], "r"))
 				{
 					is_open = 1;
-					printf("said open \n");
-					printf("file name %s \n", fin[1]);
+					//printf("said open \n");
+					//printf("file name %s \n", fin[1]);
 					get_info();
 				}
 
@@ -237,6 +237,9 @@ void get_stat(char x[])
 	int i;
 	char temp[11];
 	char temp_giv[11];
+	int flag = 0;
+
+
 	RootDirSectors = (BPB_NumFATS * BPB_FATSz32 * BPB_BytesPerSec) + (BPB_RsvdSecCnt * BPB_BytesPerSec);
 	
 	fseek(fat_32, RootDirSectors, SEEK_SET);	
@@ -258,10 +261,10 @@ void get_stat(char x[])
 	
 	for(i = 0; i < 16; i++)
 	{
-		printf("temp_giv = %s \n", temp_giv);
+		//printf("temp_giv = %s \n", temp_giv);
 		strcpy(temp, dir_entry[i].DIR_Name);
 		
-		int flag = 0;
+		
 		strcpy(temp_giv, x);
 
 		//take the string the user gives as argument and make it capitalized
@@ -283,29 +286,33 @@ void get_stat(char x[])
 		
 		//reset the counter as manual string check is about to begin
 		counter = 0;
-		while(counter != 11)
+		while(counter < 11)
 		{
-			printf("temp = %s \n", temp);
-			printf("temp_give = %s \n", temp_giv);
-			printf("temp[%d] = %c\n", counter, temp[counter]);
-			printf("temp_giv[%d] = %c\n", counter_giv, temp_giv[counter_giv]);
+			//printf("temp = %s \n", temp);
+			//printf("temp_give = %s \n", temp_giv);
+			//printf("temp[%d] = %c\n", counter, temp[counter]);
+			//printf("temp_giv[%d] = %c\n", counter_giv, temp_giv[counter_giv]);
 
 			if(temp[counter] != 32)
 			{
 				if(temp[counter] == temp_giv[counter_giv])
 				{
-					printf("1\n");
+					//printf("1\n");
 					counter_giv++;
 					counter++;
 					if(temp_giv[counter_giv] == 14)
 					{
 						counter_giv++;
 					}
+					if(counter == 10)
+					{
+						flag = 0;
+					}
 				}
 				
 				else
 				{
-					printf("2\n");
+					//printf("2\n");
 					flag = 1;
 					break;
 				}
@@ -313,7 +320,7 @@ void get_stat(char x[])
 
 			else
 			{
-				printf("3\n");
+				//printf("3\n");
 				counter++;
 
 			/*	if(temp_giv[counter_giv] == 14)
@@ -326,7 +333,7 @@ void get_stat(char x[])
 
 		if(flag == 0)
 		{
-			printf("MATCH FOUND the corresponding i is %d\n", i);
+			//printf("MATCH FOUND the corresponding i is %d\n", i);
 			printf("\n");
 			printf("Name: \t\t %s\n", x);
 			printf("Attribute: \t %d\n", dir_entry[i].DIR_Attr);
@@ -348,31 +355,10 @@ void get_stat(char x[])
 		//}
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	if(flag == 1)
+	{
+		printf("ERROR: File not found\n");
+	}
 
 
 
