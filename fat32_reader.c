@@ -245,45 +245,28 @@ void get_stat(char x[])
 		fread(&dir_entry[i], 32, 1, fat_32);
 	}
 
-	for(i = 0; i < 16; i++)
+/*	for(i = 0; i < 16; i++)
 	{
 		//char temp[20] = dir_entry[i].DIR_Name;
 		printf("Dir Name[%d] = %s\n", i, dir_entry[i].DIR_Name);
 	}
 
-	printf("x = %s \n", x);
+*/
 	
 	int counter = 0;
-	
-	strcpy(temp_giv, x);
-
-	printf("lower x = %s \n", temp_giv);
-	/*while(temp_giv[counter] != '\0')
-	{
-		printf("jaja \n");
-		if(temp_giv[counter] >= 97 || temp_giv[counter] <= 122)
-		{
-			temp_giv[counter]-=32;
-			//printf("j[%d] = %c\n", counter, j[counter]);
-		}
-		
-		counter++;
-	}
-	
-	counter = 0;*/
-	printf("upper x = %s \n", temp_giv);
+	int counter_giv = 0;
 	
 	for(i = 0; i < 16; i++)
 	{
 		printf("temp_giv = %s \n", temp_giv);
 		strcpy(temp, dir_entry[i].DIR_Name);
-		counter = 0;
-		int counter_giv = 0;
+		
 		int flag = 0;
 		strcpy(temp_giv, x);
+
+		//take the string the user gives as argument and make it capitalized
 		while(temp_giv[counter] != '\0')
 		{
-			printf("jaja \n");
 			if(temp_giv[counter] >= 97 || temp_giv[counter] <= 122)
 			{
 				temp_giv[counter]-=32;
@@ -297,11 +280,12 @@ void get_stat(char x[])
 		
 			counter++;
 		}
-		printf("temp_giv11 = %s \n", temp_giv);
+		
+		//reset the counter as manual string check is about to begin
 		counter = 0;
 		while(counter != 11)
 		{
-			printf("temp = %s \n", temp);
+			//printf("temp = %s \n", temp);
 			//printf("temp_give = %s \n", temp_giv);
 			printf("temp[%d] = %c\n", counter, temp[counter]);
 			printf("temp_giv[%d] = %c\n", counter_giv, temp_giv[counter_giv]);
@@ -339,6 +323,13 @@ void get_stat(char x[])
 		if(flag == 0)
 		{
 			printf("MATCH FOUND the corresponding i is %d\n", i);
+			printf("\n");
+			printf("Name: \t\t %s\n", x);
+			printf("Attribute: \t %d\n", dir_entry[i].DIR_Attr);
+			printf("High: \t %d\n", dir_entry[i].DIR_FirstClusterHigh);
+			printf("Low: \t %d\n", dir_entry[i].DIR_FirstClusterLow);
+			printf("Size: \t %d\n", dir_entry[i].DIR_FileSize);
+			printf("\n");
 			break;
 		}
 
