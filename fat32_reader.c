@@ -236,6 +236,7 @@ void get_stat(char x[])
 {
 	int i;
 	char temp[11];
+	char temp_giv[11];
 	RootDirSectors = (BPB_NumFATS * BPB_FATSz32 * BPB_BytesPerSec) + (BPB_RsvdSecCnt * BPB_BytesPerSec);
 	
 	fseek(fat_32, RootDirSectors, SEEK_SET);	
@@ -251,15 +252,105 @@ void get_stat(char x[])
 	}
 
 	printf("x = %s \n", x);
+	
+	int counter = 0;
+	
+	strcpy(temp_giv, x);
 
+	printf("lower x = %s \n", temp_giv);
+	/*while(temp_giv[counter] != '\0')
+	{
+		printf("jaja \n");
+		if(temp_giv[counter] >= 97 || temp_giv[counter] <= 122)
+		{
+			temp_giv[counter]-=32;
+			//printf("j[%d] = %c\n", counter, j[counter]);
+		}
+		
+		counter++;
+	}
+	
+	counter = 0;*/
+	printf("upper x = %s \n", temp_giv);
+	
 	for(i = 0; i < 16; i++)
 	{
+		printf("temp_giv = %s \n", temp_giv);
 		strcpy(temp, dir_entry[i].DIR_Name);
-		printf("temp = %s \n", temp);
-		if(strcmp(temp, x) == 0)
+		counter = 0;
+		int counter_giv = 0;
+		int flag = 0;
+		strcpy(temp_giv, x);
+		while(temp_giv[counter] != '\0')
 		{
-			printf("FOUND! \n");
+			printf("jaja \n");
+			if(temp_giv[counter] >= 97 || temp_giv[counter] <= 122)
+			{
+				temp_giv[counter]-=32;
+				//printf("j[%d] = %c\n", counter, j[counter]);
+			}
+
+			if(temp_giv[counter] == 46)
+			{
+				temp_giv[counter] = 32;
+			}
+		
+			counter++;
 		}
+		printf("temp_giv11 = %s \n", temp_giv);
+		counter = 0;
+		while(counter != 11)
+		{
+			printf("temp = %s \n", temp);
+			//printf("temp_give = %s \n", temp_giv);
+			printf("temp[%d] = %c\n", counter, temp[counter]);
+			printf("temp_giv[%d] = %c\n", counter_giv, temp_giv[counter_giv]);
+
+			if(temp[counter] != 32)
+			{
+				if(temp[counter] == temp_giv[counter_giv])
+				{
+					printf("1\n");
+					counter_giv++;
+					counter++;
+				}
+				
+				else
+				{
+					printf("2\n");
+					flag = 1;
+					break;
+				}
+			}
+
+			else
+			{
+				printf("3\n");
+				counter++;
+
+				if(temp_giv[counter_giv] == 14)
+				{
+					counter_giv++;
+				}
+			}
+			//j = temp[counter];
+		}
+
+		if(flag == 0)
+		{
+			printf("MATCH FOUND the corresponding i is %d\n", i);
+			break;
+		}
+
+		//break;
+		
+		counter = 0;
+		counter_giv = 0;
+		//printf("temp = %s \n", temp);
+		//if(strcmp(temp, x) == 0)
+		//{
+		//	printf("FOUND! \n");
+		//}
 	}
 
 
