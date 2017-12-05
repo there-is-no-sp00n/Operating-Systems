@@ -13,6 +13,25 @@
 
 FILE *fat_32;
 
+char BS_OEMName[8];
+int16_t BPB_RootEntCnt;
+char BS_VolLab[11];
+int32_t BPB_RootClus;
+
+int32_t RootDirSectors = 0;
+int32_t FirstDataSector = 0;
+int32_t FirstSectorofCluster = 0;
+	
+
+int16_t BPB_BytesPerSec;
+int8_t BPB_SecPerClus;
+int16_t BPB_RsvdSecCnt;
+int8_t BPB_NumFATS;
+int32_t BPB_FATSz32;
+
+
+
+
 struct __attribute__((__packed__)) DirectoryEntry
 {
 	char DIR_Name[11];
@@ -27,6 +46,10 @@ struct __attribute__((__packed__)) DirectoryEntry
 struct DirectoryEntry dir_entry[16];
 
 void get_info();
+void disp_info();
+
+void get_stat(char x[]);
+
 
 int main()
 {
@@ -118,7 +141,7 @@ int main()
 					is_open = 1;
 					printf("said open \n");
 					printf("file name %s \n", fin[1]);
-					//get_info();
+					get_info();
 				}
 
 				else{printf("ERROR: File system image not found\n");}
@@ -150,13 +173,26 @@ int main()
 		{
 			if(is_open == 1)
 			{
-				get_info();
+				disp_info();
 			}
 
 			else
 			{
 				printf("ERROR: File system image must be opened first\n");
 			}		
+		}
+
+		if(strcmp("stat", fin[0]) == 0)
+		{
+			if(is_open == 1)
+			{
+				get_stat(fin[1]);
+			}
+
+			else
+			{
+				printf("ERROR: File system image must be opened first\n");
+			}
 		}
 	}
 
@@ -165,28 +201,28 @@ int main()
 
 void get_info()
 {
-	char BS_OEMName[8];
-	int16_t BPB_RootEntCnt;
-	char BS_VolLab[11];
-	int32_t BPB_RootClus;
-	
-
-	int16_t BPB_BytesPerSec;
-	int8_t BPB_SecPerClus;
-	int16_t BPB_RsvdSecCnt;
-	int8_t BPB_NumFATS;
-	int32_t BPB_FATSz32;
-
-	fseek(fat_32, 11, SEEK_SET);
-	//fread(&BS_OEMName, 8, 1, fat_32);
+	fseek(fat_32, 3, SEEK_SET);
+	fread(&BS_OEMName, 8, 1, fat_32);
 	fread(&BPB_BytesPerSec, 2, 1, fat_32);
 	fread(&BPB_SecPerClus, 1, 1, fat_32);
 	fread(&BPB_RsvdSecCnt, 2, 1, fat_32);
 	fread(&BPB_NumFATS, 2, 1, fat_32);
+	fread(&BPB_RootEntCnt, 2, 1, fat_32);
 
 	fseek(fat_32, 36, SEEK_SET);
 	fread(&BPB_FATSz32, 4, 1, fat_32);
 	
+	fseek(fat_32, 44, SEEK_SET);
+	fread(&BPB_RootClus, 4, 1, fat_32);
+
+	fseek(fat_32, 71, SEEK_SET);
+	fread(&BS_VolLab, 11, 1, fat_32);
+	
+	
+}
+
+void disp_info()
+{
 	printf("\n");
 	printf("BPB_BytesPerSec\t\t DEC: %d \t HEX: 0x%x\n", BPB_BytesPerSec, BPB_BytesPerSec);
 	printf("BPB_SecPerClus\t\t DEC: %d \t HEX: 0x%x\n", BPB_SecPerClus, BPB_SecPerClus);
@@ -194,5 +230,64 @@ void get_info()
 	printf("BPB_NumFATS\t\t DEC: %d \t HEX: 0x%x\n", BPB_NumFATS, BPB_NumFATS);
 	printf("BPB_FATSz32\t\t DEC: %d \t HEX: 0x%x\n", BPB_FATSz32, BPB_FATSz32);
 	printf("\n");
+
+}
+void get_stat(char x[])
+{
+	int i;
+	char temp[11];
+	RootDirSectors = (BPB_NumFATS * BPB_FATSz32 * BPB_BytesPerSec) + (BPB_RsvdSecCnt * BPB_BytesPerSec);
+	
+	fseek(fat_32, RootDirSectors, SEEK_SET);	
+	for(i = 0; i < 16; i++)
+	{
+		fread(&dir_entry[i], 32, 1, fat_32);
+	}
+
+	for(i = 0; i < 16; i++)
+	{
+		//char temp[20] = dir_entry[i].DIR_Name;
+		printf("Dir Name[%d] = %s\n", i, dir_entry[i].DIR_Name);
+	}
+
+	printf("x = %s \n", x);
+
+	for(i = 0; i < 16; i++)
+	{
+		strcpy(temp, dir_entry[i].DIR_Name);
+		printf("temp = %s \n", temp);
+		if(strcmp(temp, x) == 0)
+		{
+			printf("FOUND! \n");
+		}
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
