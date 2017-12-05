@@ -118,6 +118,7 @@ int main()
 					is_open = 1;
 					printf("said open \n");
 					printf("file name %s \n", fin[1]);
+					//get_info();
 				}
 
 				else{printf("ERROR: File system image not found\n");}
@@ -144,6 +145,19 @@ int main()
 				printf("ERROR: File system not open\n");
 			}
 		}
+
+		if(strcmp("info", fin[0]) == 0)
+		{
+			if(is_open == 1)
+			{
+				get_info();
+			}
+
+			else
+			{
+				printf("ERROR: File system image must be opened first\n");
+			}		
+		}
 	}
 
 	return 0;
@@ -151,27 +165,34 @@ int main()
 
 void get_info()
 {
+	char BS_OEMName[8];
+	int16_t BPB_RootEntCnt;
+	char BS_VolLab[11];
+	int32_t BPB_RootClus;
+	
+
 	int16_t BPB_BytesPerSec;
 	int8_t BPB_SecPerClus;
 	int16_t BPB_RsvdSecCnt;
 	int8_t BPB_NumFATS;
 	int32_t BPB_FATSz32;
 
+	fseek(fat_32, 11, SEEK_SET);
+	//fread(&BS_OEMName, 8, 1, fat_32);
+	fread(&BPB_BytesPerSec, 2, 1, fat_32);
+	fread(&BPB_SecPerClus, 1, 1, fat_32);
+	fread(&BPB_RsvdSecCnt, 2, 1, fat_32);
+	fread(&BPB_NumFATS, 2, 1, fat_32);
+
+	fseek(fat_32, 36, SEEK_SET);
+	fread(&BPB_FATSz32, 4, 1, fat_32);
 	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	printf("\n");
+	printf("BPB_BytesPerSec\t\t DEC: %d \t HEX: 0x%x\n", BPB_BytesPerSec, BPB_BytesPerSec);
+	printf("BPB_SecPerClus\t\t DEC: %d \t HEX: 0x%x\n", BPB_SecPerClus, BPB_SecPerClus);
+	printf("BPB_RsvdSecCnt\t\t DEC: %d \t HEX: 0x%x\n", BPB_RsvdSecCnt, BPB_RsvdSecCnt);
+	printf("BPB_NumFATS\t\t DEC: %d \t HEX: 0x%x\n", BPB_NumFATS, BPB_NumFATS);
+	printf("BPB_FATSz32\t\t DEC: %d \t HEX: 0x%x\n", BPB_FATSz32, BPB_FATSz32);
+	printf("\n");
 
 }
