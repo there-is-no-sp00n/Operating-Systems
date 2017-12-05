@@ -285,8 +285,8 @@ void get_stat(char x[])
 		counter = 0;
 		while(counter != 11)
 		{
-			//printf("temp = %s \n", temp);
-			//printf("temp_give = %s \n", temp_giv);
+			printf("temp = %s \n", temp);
+			printf("temp_give = %s \n", temp_giv);
 			printf("temp[%d] = %c\n", counter, temp[counter]);
 			printf("temp_giv[%d] = %c\n", counter_giv, temp_giv[counter_giv]);
 
@@ -297,6 +297,10 @@ void get_stat(char x[])
 					printf("1\n");
 					counter_giv++;
 					counter++;
+					if(temp_giv[counter_giv] == 14)
+					{
+						counter_giv++;
+					}
 				}
 				
 				else
@@ -312,10 +316,10 @@ void get_stat(char x[])
 				printf("3\n");
 				counter++;
 
-				if(temp_giv[counter_giv] == 14)
+			/*	if(temp_giv[counter_giv] == 14)
 				{
 					counter_giv++;
-				}
+				}*/
 			}
 			//j = temp[counter];
 		}
