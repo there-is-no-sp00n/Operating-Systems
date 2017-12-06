@@ -248,11 +248,11 @@ void get_stat(char x[])
 		fread(&dir_entry[i], 32, 1, fat_32);
 	}
 
-	for(i = 0; i < 16; i++)
-	{
-		//char temp[20] = dir_entry[i].DIR_Name;
-		printf("Dir Name[%d] = %s\n", i, dir_entry[i].DIR_Name);
-	}
+	//for(i = 0; i < 16; i++)
+	//{
+	//	//char temp[20] = dir_entry[i].DIR_Name;
+	//	printf("Dir Name[%d] = %s\n", i, dir_entry[i].DIR_Name);
+	//}
 
 	
 	int counter = 0;
@@ -301,22 +301,22 @@ void get_stat(char x[])
 			counter++;
 		}
 
-		printf("temp_giv = %s \n", temp_giv);
+		//printf("temp_giv = %s \n", temp_giv);
 		
 		//reset the counter as manual string check is about to begin
 		counter = 0;
 		while(counter < 11)
 		{
-			printf("temp = %s \n", temp);
-			printf("temp_give = %s \n", temp_giv);
-			printf("temp[%d] = %c\n", counter, temp[counter]);
-			printf("temp_giv[%d] = %c\n", counter_giv, temp_giv[counter_giv]);
+			//printf("temp = %s \n", temp);
+			//printf("temp_give = %s \n", temp_giv);
+			//printf("temp[%d] = %c\n", counter, temp[counter]);
+			//printf("temp_giv[%d] = %c\n", counter_giv, temp_giv[counter_giv]);
 
 			if(temp[counter] != 32)
 			{
 				if(temp[counter] == temp_giv[counter_giv])
 				{
-					printf("1\n");
+					//printf("1\n");
 					counter_giv++;
 					counter++;
 					if(temp_giv[counter_giv] == 14)
@@ -338,7 +338,7 @@ void get_stat(char x[])
 				
 				else
 				{
-					printf("2\n");
+					//printf("2\n");
 					flag = 1;
 					break;
 				}
@@ -346,7 +346,7 @@ void get_stat(char x[])
 
 			else
 			{
-				printf("3\n");
+				//printf("3\n");
 				counter++;
 
 			/*	if(temp_giv[counter_giv] == 14)
@@ -357,7 +357,7 @@ void get_stat(char x[])
 			//j = temp[counter];
 		}
 
-		printf("flag == %d\n", flag);
+		//printf("flag == %d\n", flag);
 
 
 		if(flag == 0)
