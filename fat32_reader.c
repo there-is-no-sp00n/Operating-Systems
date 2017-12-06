@@ -56,6 +56,8 @@ void get_stat(char x[]);
 
 void cd(char x[], char y[]);
 
+void ls();
+
 int LBAToOffset(int32_t sector)
 {
     
@@ -211,19 +213,32 @@ int main()
 		{
 			if(is_open == 1)
 			{
-				for(i = 0; i < 16; i++)
-				{
+				//for(i = 0; i < 16; i++)
+				//{
 					//char temp[20] = dir_entry[i].DIR_Name;
-					printf("Dir Name[%d] = %s\n", i, dir_entry[i].DIR_Name);
-				}
+				//	printf("Dir Name[%d] = %s\n", i, dir_entry[i].DIR_Name);
+				//}
 
 				//printf("fin[2] = %s", fin[2]);
 				cd(fin[1], fin[2]);
-				for(i = 0; i < 16; i++)
-				{
+				//for(i = 0; i < 16; i++)
+				//{
 					//char temp[20] = dir_entry[i].DIR_Name;
-					printf("Dir Name[%d] = %s\n", i, dir_entry[i].DIR_Name);
-				}
+				//	printf("Dir Name[%d] = %s\n", i, dir_entry[i].DIR_Name);
+				//}
+			}
+
+			else
+			{
+				printf("ERROR: File system image must be opened first\n");
+			}
+		}
+
+		if(strcmp("ls", fin[0]) == 0)
+		{
+			if(is_open == 1)
+			{
+				ls();
 			}
 
 			else
@@ -427,10 +442,11 @@ void get_stat(char x[])
 
 }
 
+
 void cd(char x[], char y[])
 {
 
-	printf("Dir Index = %d\n", dir_index);
+	//printf("Dir Index = %d\n", dir_index);
 	int i;
 	char temp[11];
 	char temp_giv[11];
@@ -603,13 +619,13 @@ void cd(char x[], char y[])
 			//	if(y == '\0')
 			//	{
 					dir_index++;
-					printf("Name: \t\t %s\n", dir_entry[i].DIR_Name);
+					//printf("Name: \t\t %s\n", dir_entry[i].DIR_Name);
 					//this is where i am going
-					printf("Dir Index4 = %d\n", dir_index);
+					//printf("Dir Index4 = %d\n", dir_index);
 					current_dir = LBAToOffset(dir_entry[i].DIR_FirstClusterLow);
 					dir_visited[dir_index] = current_dir;
 					
-					printf("Dir Index5 = %d\n", dir_index);
+			//		printf("Dir Index5 = %d\n", dir_index);
 				
                 			fseek(fat_32, current_dir, SEEK_SET);
                 
@@ -626,6 +642,10 @@ void cd(char x[], char y[])
 					//char temp[20] = dir_entry[i].DIR_Name;
 				//	printf("Dir Name[%d] = %s\n", i, dir_entry[i].DIR_Name);
 				//}		
+			}
+			else
+			{
+				printf("ERROR: Not a folder\n");
 			}
 	/*		//printf("MATCH FOUND the corresponding i is %d\n", i);
 			printf("\n");
@@ -656,3 +676,43 @@ void cd(char x[], char y[])
 		printf("ERROR: File not found\n");
 	}
 }
+
+
+void ls()
+{
+	int i;
+	char temp[11];
+	char temp2[11];
+	
+	
+	for(i = 0; i < 16; i++)
+	{
+		//printf("N = %s, ATT: %d\n", dir_entry[i].DIR_Name, dir_entry[i].DIR_Attr);
+		//char temp[20] = dir_entry[i].DIR_Name;
+		//strcpy(temp, dir_entry[i].DIR_Name);
+		if((dir_entry[i].DIR_Attr == 32) || (dir_entry[i].DIR_Attr == 16))
+		{
+			strcpy(temp2, dir_entry[i].DIR_Name);
+			//printf("TEMP2 = %s\n", temp2);
+			if((temp2[0] >= 65 && temp2[0] <= 90))
+			{
+				strncpy(temp,dir_entry[i].DIR_Name,11);
+				printf("%s\n", temp);
+			}
+		}	
+	}
+	
+	for(i = 0; i < 16; i++)
+	{
+		//printf("temp_giv = %s \n", temp_giv);
+		strcpy(temp, dir_entry[i].DIR_Name);
+	}
+}
+
+
+
+
+
+
+
+
