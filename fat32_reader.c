@@ -248,13 +248,12 @@ void get_stat(char x[])
 		fread(&dir_entry[i], 32, 1, fat_32);
 	}
 
-/*	for(i = 0; i < 16; i++)
+	for(i = 0; i < 16; i++)
 	{
 		//char temp[20] = dir_entry[i].DIR_Name;
 		printf("Dir Name[%d] = %s\n", i, dir_entry[i].DIR_Name);
 	}
 
-*/
 	
 	int counter = 0;
 	int counter_giv = 0;
@@ -270,49 +269,76 @@ void get_stat(char x[])
 		//take the string the user gives as argument and make it capitalized
 		while(temp_giv[counter] != '\0')
 		{
-			if(temp_giv[counter] >= 97 || temp_giv[counter] <= 122)
-			{
-				temp_giv[counter]-=32;
-				//printf("j[%d] = %c\n", counter, j[counter]);
-			}
 
 			if(temp_giv[counter] == 46)
 			{
-				temp_giv[counter] = 32;
+				//printf("1 temp_give[%d] = %c \n", counter, temp_giv[counter]);
+				temp_giv[counter] -= 32;
+			}
+
+		
+			else if(temp_giv[counter] >= 97 && temp_giv[counter] <= 122)
+			{
+				//if(temp_giv[counter] <= 122)
+				//{
+					//printf("2 temp_give[%d] = %c \n", counter, temp_giv[counter]);
+					temp_giv[counter]-=32;
+				//}
+				//printf("j[%d] = %c\n", counter, j[counter]);
+			}
+
+			else if(temp_giv[counter] >= 65 && temp_giv[counter] <= 90)
+			{
+				//if(temp_giv[counter] <= 90)
+				//{
+					//printf("3 temp_give[%d] = %c \n", counter, temp_giv[counter]);
+					counter++;
+					continue;
+				///}				
+				
 			}
 		
 			counter++;
 		}
+
+		printf("temp_giv = %s \n", temp_giv);
 		
 		//reset the counter as manual string check is about to begin
 		counter = 0;
 		while(counter < 11)
 		{
-			//printf("temp = %s \n", temp);
-			//printf("temp_give = %s \n", temp_giv);
-			//printf("temp[%d] = %c\n", counter, temp[counter]);
-			//printf("temp_giv[%d] = %c\n", counter_giv, temp_giv[counter_giv]);
+			printf("temp = %s \n", temp);
+			printf("temp_give = %s \n", temp_giv);
+			printf("temp[%d] = %c\n", counter, temp[counter]);
+			printf("temp_giv[%d] = %c\n", counter_giv, temp_giv[counter_giv]);
 
 			if(temp[counter] != 32)
 			{
 				if(temp[counter] == temp_giv[counter_giv])
 				{
-					//printf("1\n");
+					printf("1\n");
 					counter_giv++;
 					counter++;
 					if(temp_giv[counter_giv] == 14)
 					{
 						counter_giv++;
 					}
+
+					if(temp_giv[counter_giv] == '\0')
+					{
+						flag = 0;
+						break;
+					}
 					if(counter == 10)
 					{
 						flag = 0;
+						break;
 					}
 				}
 				
 				else
 				{
-					//printf("2\n");
+					printf("2\n");
 					flag = 1;
 					break;
 				}
@@ -320,7 +346,7 @@ void get_stat(char x[])
 
 			else
 			{
-				//printf("3\n");
+				printf("3\n");
 				counter++;
 
 			/*	if(temp_giv[counter_giv] == 14)
@@ -330,6 +356,9 @@ void get_stat(char x[])
 			}
 			//j = temp[counter];
 		}
+
+		printf("flag == %d\n", flag);
+
 
 		if(flag == 0)
 		{
