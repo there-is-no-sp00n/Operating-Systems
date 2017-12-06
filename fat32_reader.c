@@ -29,6 +29,10 @@ int16_t BPB_RsvdSecCnt;
 int8_t BPB_NumFATS;
 int32_t BPB_FATSz32;
 
+int current_dir;
+int dir_visited[10];
+int dir_index = 0;
+
 
 
 
@@ -50,12 +54,20 @@ void disp_info();
 
 void get_stat(char x[]);
 
+void cd(char x[], char y[]);
+
+int LBAToOffset(int32_t sector)
+{
+    
+    return ( (sector - 2) * BPB_BytesPerSec) + (BPB_BytesPerSec * BPB_RsvdSecCnt) + (BPB_BytesPerSec * BPB_NumFATS * BPB_FATSz32);
+}
 
 int main()
 {
 
 	char input[100];
 	int is_open = 0;
+	int i;
 
 
 	while(1)
@@ -194,6 +206,31 @@ int main()
 				printf("ERROR: File system image must be opened first\n");
 			}
 		}
+
+		if(strcmp("cd", fin[0]) == 0)
+		{
+			if(is_open == 1)
+			{
+				for(i = 0; i < 16; i++)
+				{
+					//char temp[20] = dir_entry[i].DIR_Name;
+					printf("Dir Name[%d] = %s\n", i, dir_entry[i].DIR_Name);
+				}
+
+				//printf("fin[2] = %s", fin[2]);
+				cd(fin[1], fin[2]);
+				for(i = 0; i < 16; i++)
+				{
+					//char temp[20] = dir_entry[i].DIR_Name;
+					printf("Dir Name[%d] = %s\n", i, dir_entry[i].DIR_Name);
+				}
+			}
+
+			else
+			{
+				printf("ERROR: File system image must be opened first\n");
+			}
+		}
 	}
 
 	return 0;
@@ -201,6 +238,8 @@ int main()
 
 void get_info()
 {
+	int i;
+
 	fseek(fat_32, 3, SEEK_SET);
 	fread(&BS_OEMName, 8, 1, fat_32);
 	fread(&BPB_BytesPerSec, 2, 1, fat_32);
@@ -217,6 +256,18 @@ void get_info()
 
 	fseek(fat_32, 71, SEEK_SET);
 	fread(&BS_VolLab, 11, 1, fat_32);
+
+	RootDirSectors = (BPB_NumFATS * BPB_FATSz32 * BPB_BytesPerSec) + (BPB_RsvdSecCnt * BPB_BytesPerSec);
+
+	current_dir = RootDirSectors;
+	dir_visited[dir_index] = current_dir; 
+	//dir_index++;
+
+	fseek(fat_32, RootDirSectors, SEEK_SET);	
+	for(i = 0; i < 16; i++)
+	{
+		fread(&dir_entry[i], 32, 1, fat_32);
+	}
 	
 	
 }
@@ -238,22 +289,7 @@ void get_stat(char x[])
 	char temp[11];
 	char temp_giv[11];
 	int flag = 0;
-
-
-	RootDirSectors = (BPB_NumFATS * BPB_FATSz32 * BPB_BytesPerSec) + (BPB_RsvdSecCnt * BPB_BytesPerSec);
 	
-	fseek(fat_32, RootDirSectors, SEEK_SET);	
-	for(i = 0; i < 16; i++)
-	{
-		fread(&dir_entry[i], 32, 1, fat_32);
-	}
-
-	//for(i = 0; i < 16; i++)
-	//{
-	//	//char temp[20] = dir_entry[i].DIR_Name;
-	//	printf("Dir Name[%d] = %s\n", i, dir_entry[i].DIR_Name);
-	//}
-
 	
 	int counter = 0;
 	int counter_giv = 0;
@@ -389,6 +425,234 @@ void get_stat(char x[])
 		printf("ERROR: File not found\n");
 	}
 
+}
+
+void cd(char x[], char y[])
+{
+
+	printf("Dir Index = %d\n", dir_index);
+	int i;
+	char temp[11];
+	char temp_giv[11];
+	int flag = 0;
+	
+	if(strcmp("..", x) == 0)
+	{
+
+		if(dir_index == 0)
+		{
+			printf("ERROR: At root directory, cannot go back\n");
+			return;
+		}
+
+		else
+		{
+			//printf("in .. \n");
+			//printf("Dir Index2 = %d\n", dir_index);
+			dir_index--;
+			//printf("Dir Index3 = %d\n", dir_index);
+			current_dir = dir_visited[dir_index];
+			fseek(fat_32, current_dir, SEEK_SET);
+            
+        		for(i = 0; i < 16; i++)
+               		{
+               			fread(&dir_entry[i], 32, 1, fat_32);
+          		}
+			return;
+		}
+	}
+
+		
+	
+	//fseek(fat_32, RootDirSectors, SEEK_SET);	
+	//for(i = 0; i < 16; i++)
+	//{
+	//	fread(&dir_entry[i], 32, 1, fat_32);
+	//}
+
+	//for(i = 0; i < 16; i++)
+	//{
+	//	//char temp[20] = dir_entry[i].DIR_Name;
+	//	printf("Dir Name[%d] = %s\n", i, dir_entry[i].DIR_Name);
+	//}
+
+	
+	int counter = 0;
+	int counter_giv = 0;
 
 
+	/*if(y == '\0')
+	{
+		
+					
+	}
+
+	else
+	{
+		
+	}*/
+	
+	for(i = 0; i < 16; i++)
+	{
+		//printf("temp_giv = %s \n", temp_giv);
+		strcpy(temp, dir_entry[i].DIR_Name);
+		
+		
+		strcpy(temp_giv, x);
+
+		//take the string the user gives as argument and make it capitalized
+		while(temp_giv[counter] != '\0')
+		{
+
+			if(temp_giv[counter] == 46)
+			{
+				//printf("1 temp_give[%d] = %c \n", counter, temp_giv[counter]);
+				temp_giv[counter] -= 32;
+			}
+
+		
+			else if(temp_giv[counter] >= 97 && temp_giv[counter] <= 122)
+			{
+				//if(temp_giv[counter] <= 122)
+				//{
+					//printf("2 temp_give[%d] = %c \n", counter, temp_giv[counter]);
+					temp_giv[counter]-=32;
+				//}
+				//printf("j[%d] = %c\n", counter, j[counter]);
+			}
+
+			else if(temp_giv[counter] >= 65 && temp_giv[counter] <= 90)
+			{
+				//if(temp_giv[counter] <= 90)
+				//{
+					//printf("3 temp_give[%d] = %c \n", counter, temp_giv[counter]);
+					counter++;
+					continue;
+				///}				
+				
+			}
+		
+			counter++;
+		}
+
+		//printf("temp_giv = %s \n", temp_giv);
+		
+		//reset the counter as manual string check is about to begin
+		counter = 0;
+		while(counter < 11)
+		{
+		//	printf("temp = %s \n", temp);
+		//	printf("temp_give = %s \n", temp_giv);
+		//	printf("temp[%d] = %c\n", counter, temp[counter]);
+		//	printf("temp_giv[%d] = %c\n", counter_giv, temp_giv[counter_giv]);
+
+			if(temp[counter] != 32)
+			{
+				if(temp[counter] == temp_giv[counter_giv])
+				{
+		//			printf("1\n");
+					counter_giv++;
+					counter++;
+					if(temp_giv[counter_giv] == 14)
+					{
+						counter_giv++;
+					}
+
+					if(temp_giv[counter_giv] == '\0')
+					{
+						flag = 0;
+						break;
+					}
+					if(counter == 10)
+					{
+						flag = 0;
+						break;
+					}
+				}
+				
+				else
+				{
+		//			printf("2\n");
+					flag = 1;
+					break;
+				}
+			}
+
+			else
+			{
+			//	printf("3\n");
+				counter++;
+
+			/*	if(temp_giv[counter_giv] == 14)
+				{
+					counter_giv++;
+				}*/
+			}
+			//j = temp[counter];
+		}
+
+		//printf("flag == %d\n", flag);
+
+
+		if(flag == 0)
+		{
+
+			
+			if(dir_entry[i].DIR_FileSize == 0)
+			{
+			//	if(y == '\0')
+			//	{
+					dir_index++;
+					printf("Name: \t\t %s\n", dir_entry[i].DIR_Name);
+					//this is where i am going
+					printf("Dir Index4 = %d\n", dir_index);
+					current_dir = LBAToOffset(dir_entry[i].DIR_FirstClusterLow);
+					dir_visited[dir_index] = current_dir;
+					
+					printf("Dir Index5 = %d\n", dir_index);
+				
+                			fseek(fat_32, current_dir, SEEK_SET);
+                
+                			for(i = 0; i < 16; i++)
+                			{
+                    			fread(&dir_entry[i], 32, 1, fat_32);
+                			}
+			//	}
+
+				
+				
+				//for(i = 0; i < 16; i++)
+				//{
+					//char temp[20] = dir_entry[i].DIR_Name;
+				//	printf("Dir Name[%d] = %s\n", i, dir_entry[i].DIR_Name);
+				//}		
+			}
+	/*		//printf("MATCH FOUND the corresponding i is %d\n", i);
+			printf("\n");
+			printf("Name: \t\t %s\n", x);
+			printf("Attribute: \t %d\n", dir_entry[i].DIR_Attr);
+			printf("High: \t %d\n", dir_entry[i].DIR_FirstClusterHigh);
+			printf("Low: \t %d\n", dir_entry[i].DIR_FirstClusterLow);
+			printf("Size: \t %d\n", dir_entry[i].DIR_FileSize);
+			printf("\n");
+			break; */
+
+		break;
+		}
+
+		//break;
+		
+		counter = 0;
+		counter_giv = 0;
+		//printf("temp = %s \n", temp);
+		//if(strcmp(temp, x) == 0)
+		//{
+		//	printf("FOUND! \n");
+		//}
+	}
+
+	if(flag == 1)
+	{
+		printf("ERROR: File not found\n");
+	}
 }
