@@ -1,7 +1,9 @@
 /*
-	Aninda Aminuzzaman
-	1001018367
+	Name: Aninda Aminuzzaman
+	ID: 1001018367
 */
+
+
 
 
 #include <stdio.h>
@@ -49,20 +51,30 @@ struct __attribute__((__packed__)) DirectoryEntry
 
 struct DirectoryEntry dir_entry[16];
 
+//if the file is opened successfully, we get info
 void get_info();
+//type "info" on the terminal
 void disp_info();
 
+//type "stat" on the terminal
 void get_stat(char x[]);
 
+//type "cd" on the terminal, it can go into new directories, or go back to previous directories
 void cd(char x[], char y[]);
 
+//list the desired items in the current directory by typing "ls" on the terminal
 void ls();
 
+//get the volume name/label of the FAT32 system
+void volume();
+
+//given by professor to help in navigation
 int LBAToOffset(int32_t sector)
 {
     
-    return ( (sector - 2) * BPB_BytesPerSec) + (BPB_BytesPerSec * BPB_RsvdSecCnt) + (BPB_BytesPerSec * BPB_NumFATS * BPB_FATSz32);
+    return ((sector - 2) * BPB_BytesPerSec) + (BPB_BytesPerSec * BPB_RsvdSecCnt) + (BPB_NumFATS * BPB_FATSz32 * BPB_BytesPerSec);
 }
+
 
 int main()
 {
@@ -246,6 +258,19 @@ int main()
 				printf("ERROR: File system image must be opened first\n");
 			}
 		}
+		
+		if(strcmp("volume", fin[0]) == 0)
+		{
+			if(is_open == 1)
+			{
+				volume();
+			}
+
+			else
+			{
+				printf("ERROR: File system image must be opened first\n");
+			}
+		}
 	}
 
 	return 0;
@@ -270,7 +295,7 @@ void get_info()
 	fread(&BPB_RootClus, 4, 1, fat_32);
 
 	fseek(fat_32, 71, SEEK_SET);
-	fread(&BS_VolLab, 11, 1, fat_32);
+	fread(&BS_VolLab, 11, 1, fat_32);	
 
 	RootDirSectors = (BPB_NumFATS * BPB_FATSz32 * BPB_BytesPerSec) + (BPB_RsvdSecCnt * BPB_BytesPerSec);
 
@@ -317,7 +342,7 @@ void get_stat(char x[])
 		
 		strcpy(temp_giv, x);
 
-		//take the string the user gives as argument and make it capitalized
+		//take the string the user gives as argument and make it uppercase
 		while(temp_giv[counter] != '\0')
 		{
 
@@ -363,6 +388,7 @@ void get_stat(char x[])
 			//printf("temp[%d] = %c\n", counter, temp[counter]);
 			//printf("temp_giv[%d] = %c\n", counter_giv, temp_giv[counter_giv]);
 
+			//32 == SPACE
 			if(temp[counter] != 32)
 			{
 				if(temp[counter] == temp_giv[counter_giv])
@@ -370,6 +396,7 @@ void get_stat(char x[])
 					//printf("1\n");
 					counter_giv++;
 					counter++;
+					//victim of '.' being converted to uppercase
 					if(temp_giv[counter_giv] == 14)
 					{
 						counter_giv++;
@@ -477,20 +504,6 @@ void cd(char x[], char y[])
 			return;
 		}
 	}
-
-		
-	
-	//fseek(fat_32, RootDirSectors, SEEK_SET);	
-	//for(i = 0; i < 16; i++)
-	//{
-	//	fread(&dir_entry[i], 32, 1, fat_32);
-	//}
-
-	//for(i = 0; i < 16; i++)
-	//{
-	//	//char temp[20] = dir_entry[i].DIR_Name;
-	//	printf("Dir Name[%d] = %s\n", i, dir_entry[i].DIR_Name);
-	//}
 
 	
 	int counter = 0;
@@ -609,66 +622,43 @@ void cd(char x[], char y[])
 
 		//printf("flag == %d\n", flag);
 
-
+		//match found
 		if(flag == 0)
 		{
 
-			
+			//if the matching object's size is zero, its a folder
 			if(dir_entry[i].DIR_FileSize == 0)
 			{
-			//	if(y == '\0')
-			//	{
-					dir_index++;
-					//printf("Name: \t\t %s\n", dir_entry[i].DIR_Name);
-					//this is where i am going
-					//printf("Dir Index4 = %d\n", dir_index);
-					current_dir = LBAToOffset(dir_entry[i].DIR_FirstClusterLow);
-					dir_visited[dir_index] = current_dir;
+				//raise the index
+				dir_index++;
+				//change the current directory
+				current_dir = LBAToOffset(dir_entry[i].DIR_FirstClusterLow);
+				//add it to the visited list
+				dir_visited[dir_index] = current_dir;
 					
-			//		printf("Dir Index5 = %d\n", dir_index);
-				
-                			fseek(fat_32, current_dir, SEEK_SET);
-                
-                			for(i = 0; i < 16; i++)
-                			{
-                    			fread(&dir_entry[i], 32, 1, fat_32);
-                			}
-			//	}
-
-				
-				
-				//for(i = 0; i < 16; i++)
-				//{
-					//char temp[20] = dir_entry[i].DIR_Name;
-				//	printf("Dir Name[%d] = %s\n", i, dir_entry[i].DIR_Name);
-				//}		
+				//go to that location
+                		fseek(fat_32, current_dir, SEEK_SET);
+                		
+				//fill up the struct array with new entries
+               			for(i = 0; i < 16; i++)
+               			{
+                  			fread(&dir_entry[i], 32, 1, fat_32);
+                		}
+						
 			}
 			else
 			{
 				printf("ERROR: Not a folder\n");
 			}
-	/*		//printf("MATCH FOUND the corresponding i is %d\n", i);
-			printf("\n");
-			printf("Name: \t\t %s\n", x);
-			printf("Attribute: \t %d\n", dir_entry[i].DIR_Attr);
-			printf("High: \t %d\n", dir_entry[i].DIR_FirstClusterHigh);
-			printf("Low: \t %d\n", dir_entry[i].DIR_FirstClusterLow);
-			printf("Size: \t %d\n", dir_entry[i].DIR_FileSize);
-			printf("\n");
-			break; */
+	
 
-		break;
+			break;
 		}
 
-		//break;
 		
 		counter = 0;
 		counter_giv = 0;
-		//printf("temp = %s \n", temp);
-		//if(strcmp(temp, x) == 0)
-		//{
-		//	printf("FOUND! \n");
-		//}
+		
 	}
 
 	if(flag == 1)
@@ -682,18 +672,18 @@ void ls()
 {
 	int i;
 	char temp[11];
-	char temp2[11];
-	
+	char temp2[11];	
 	
 	for(i = 0; i < 16; i++)
 	{
-		//printf("N = %s, ATT: %d\n", dir_entry[i].DIR_Name, dir_entry[i].DIR_Attr);
-		//char temp[20] = dir_entry[i].DIR_Name;
-		//strcpy(temp, dir_entry[i].DIR_Name);
+		//noticed that DIR_Attr value is either 32 or 16 for desired objects
+		//however, in the other folders, there are objects with that value
+		//but they are not the desired objects to be ls'd
+		//another observation is that the items that have 32 or 16, but not desired
+		//do no begin with capital letters
 		if((dir_entry[i].DIR_Attr == 32) || (dir_entry[i].DIR_Attr == 16))
 		{
 			strcpy(temp2, dir_entry[i].DIR_Name);
-			//printf("TEMP2 = %s\n", temp2);
 			if((temp2[0] >= 65 && temp2[0] <= 90))
 			{
 				strncpy(temp,dir_entry[i].DIR_Name,11);
@@ -702,10 +692,18 @@ void ls()
 		}	
 	}
 	
-	for(i = 0; i < 16; i++)
+}
+
+void volume()
+{
+	if(strcmp("           ", BS_VolLab) == 0)
 	{
-		//printf("temp_giv = %s \n", temp_giv);
-		strcpy(temp, dir_entry[i].DIR_Name);
+		printf("ERROR: Volume name not found\n");
+	}
+	
+	else
+	{
+		printf("VOLUME: %s\n", BS_VolLab);
 	}
 }
 
