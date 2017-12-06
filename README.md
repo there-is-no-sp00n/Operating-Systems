@@ -1,3 +1,13 @@
-# Operating-Systems
+# Operating_Systems
 
-Kernel, System Calls, Virtual Machines.
+Traversing a FAT32 image file.
+
+CD/ CD ..
+
+LS
+
+STAT
+
+INFO
+
+VOLUME
