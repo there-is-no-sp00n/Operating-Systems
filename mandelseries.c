@@ -39,21 +39,7 @@ int main()
 
 		char sscale[10];
 
-		scale = atof(input[6]);
-		printf("S = %f \n", scale);
-
-		scale = scale - 0.08;
-
-		printf("S = %f \n", scale);
 		
-		//snprintf(input[6], 8, "%f", scale);
-		
-		//memcpy(input[6], &scale, sizeof(scale));
-		//input[6] = atof
-		sprintf(sscale, "%f", scale);
-
-		input[6] = sscale;
-		printf("S Scale = %s \n", input[6]);
 		
 		sprintf(num, "%d", i);
 		//printf("%s\n", num);
@@ -78,6 +64,22 @@ int main()
 
 		waitpid(child_pid, &status, 0);	
 		strcpy(file_name, "");
+
+		scale = atof(input[6]);
+		printf("S = %f \n", scale);
+
+		scale = scale / 1.25;
+
+		printf("S = %f \n", scale);
+		
+		//snprintf(input[6], 8, "%f", scale);
+		
+		//memcpy(input[6], &scale, sizeof(scale));
+		//input[6] = atof
+		sprintf(sscale, "%f", scale);
+
+		input[6] = sscale;
+		printf("S Scale = %s \n", input[6]);
 		
 	}	
 
