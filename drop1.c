@@ -164,7 +164,7 @@ int main()
 			printf("Invalid command\n");
 		}
 	 */
-		printf("Free Space: %d bytes\n", df() );
+		//printf("Free Space: %d bytes\n", df() );
 	
 
 		init();
@@ -176,7 +176,7 @@ int main()
 		if(strcmp(fin[0], "list") == 0)
 		{
 
-			printf("Executing list() \n");
+			//printf("Executing list() \n");
 			list();
 		}
 
@@ -245,7 +245,7 @@ void put(char * filename)
 	}
 	
 	int dir_idx = findFreeDirEntry();
-	printf("1 dir index = %d\n", dir_idx);
+	//printf("1 dir index = %d\n", dir_idx);
 	if(dir_idx == -1)
 	{
 		printf("ERROR: Not enough space in the file system\n");
@@ -259,7 +259,7 @@ void put(char * filename)
 	
 	int inode_idx = findFreeInode();
 	
-	printf("2\n");
+	//printf("2\n");
 	if(inode_idx == -1)
 	{
 		printf("ERROR: No free inodes\n");
@@ -351,7 +351,7 @@ void put(char * filename)
 
 void list()
 {
-	int i = 0;
+	int i, flag = 0;
 	
 
 	//while(dir_ptr[i].name != NULL)
@@ -365,14 +365,21 @@ void list()
 	//	printf("$$ %s \n", in_system[i]);
 	//}
 
-	for (i = 0; i < 10; i ++)
+	for (i = 0; i < 128; i ++)
 	{
 		if(inode_array_ptr[i]->valid == 1)
 		{
+			flag = 1;
 			printf("%s ", dir_ptr[i].name);
 			printf("%d ", inode_array_ptr[i]->size);
 			printf("%s", ctime(&inode_array_ptr[i]->date));
 		}
+	}
+
+
+	if (flag ==0)
+	{
+		printf("Nothing to print! \n");
 	}
 	
 	//for (i = 0; i < 128; i ++)
@@ -404,15 +411,21 @@ void list()
 
 void del(char * filename)
 {	
-	int i;
-	for (i = 0; i < 10; i++)
+	int i, flag = 0;
+	for (i = 0; i < 128; i++)
 	{
 		if (strcmp(in_system[i], filename)==0)
 		{
-			printf("Found what to delete\n");
+			//printf("Found what to delete\n");
 			//strcpy(dir_ptr[i].name, NULL);
 			inode_array_ptr[i]->valid = 0;
+			flag = 1;
 		}
+	}
+
+	if (flag == 0)
+	{
+		printf("File not found!\n");
 	}
 }
 
@@ -430,7 +443,7 @@ int findFreeDirEntry()
 		}
 	}
 	
-	printf("Counter == %d\n", counter);
+	//printf("Counter == %d\n", counter);
 	if(counter == 127)
 	{
 		return retval;
