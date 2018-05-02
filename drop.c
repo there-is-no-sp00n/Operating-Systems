@@ -34,7 +34,7 @@ struct directory_entry
 	int inode_idx;
 };
 
-struct directory_entry *dir_ptr;
+struct directory_entry dir_ptr[128];
 
 struct inode *inode_array_ptr[NUM_INODES];
 
@@ -51,6 +51,12 @@ void init();
 int df();
 void put(char * filename);
 void list();
+void del(char * file);
+
+
+char in_system[128][100];
+
+int in_sys_count = 0;
 
 int main()
 {
@@ -158,21 +164,46 @@ int main()
 			printf("Invalid command\n");
 		}
 	 */
-		printf("Free Space: %d bytes\n", df() );
+		//printf("Free Space: %d bytes\n", df() );
 	
 
 		init();
 		if(strcmp(fin[0], "put") == 0)
 		{
-			put(fin[1]);
+			//printf("fin[1] == %s\n", fin[1]);
+			if(fin[1] == NULL)
+			{
+				printf("ERROR: Filename missing!\n");
+			}
+			else
+			{
+				put(fin[1]);
+			}
+
 		}
 
-		if(strcmp(fin[0], "list") == 0)
+		else if(strcmp(fin[0], "list") == 0)
 		{
-
-			printf("Executing list() \n");
 			list();
 		}
+
+		else if(strcmp(fin[0], "df") == 0)
+		{
+			printf("Free Space: %d bytes\n", df());
+		}
+		
+		else if(strcmp(fin[0], "del") == 0)
+		{
+			if(fin[1] == NULL)
+			{
+				printf("ERROR: Filename missing!\n");
+			}
+			else
+			{
+				del(fin[1]);
+			}
+		}
+
 
 	}
 
@@ -210,6 +241,30 @@ void put(char * filename)
 		return;
 	}
 
+	else
+	{
+		int i;
+		for(i = 0; i < 128; i++)
+		{
+			if(strcmp(in_system[i],"") == 0)
+			{
+				strcpy(in_system[i], filename);
+				dir_ptr[i].name = (char*)malloc(strlen(filename));	
+				strncpy(dir_ptr[i].name, filename, strlen(filename));
+				dir_ptr[i].valid = 1;
+				//return;
+				break;
+			}
+		}
+
+		for(i = 0; i < 10; i++)
+		{
+			printf("put in system[%d] = %s\n", i, in_system[i]);
+		}
+		
+		//in_sys_count ++;
+	}
+
 
 	if(buff.st_size > df())
 	{
@@ -218,21 +273,21 @@ void put(char * filename)
 	}
 	
 	int dir_idx = findFreeDirEntry();
-	printf("1 dir index = %d\n", dir_idx);
+	//printf("1 dir index = %d\n", dir_idx);
 	if(dir_idx == -1)
 	{
 		printf("ERROR: Not enough space in the file system\n");
 		return;
 	}
 
-	dir_ptr[dir_idx].valid = 1;
-	dir_ptr[dir_idx].name = (char*)malloc(strlen(filename));
+	//dir_ptr[dir_idx].valid = 1;
+	//dir_ptr[dir_idx].name = (char*)malloc(strlen(filename));
 	
-	strncpy(dir_ptr[dir_idx].name, filename, strlen(filename));
+	//strncpy(dir_ptr[dir_idx].name, filename, strlen(filename));
 	
 	int inode_idx = findFreeInode();
 	
-	printf("2\n");
+	//printf("2\n");
 	if(inode_idx == -1)
 	{
 		printf("ERROR: No free inodes\n");
@@ -252,7 +307,7 @@ void put(char * filename)
 	
 	int block_index = findFreeBlock();
 	
-	printf("3\n");
+	//printf("3\n");
 	if( block_index == -1)
 	{
 		printf("ERROR: Can't find free block\n");
@@ -316,41 +371,114 @@ void put(char * filename)
 
 	fclose(ifp);
 	return;
-	
-
-	//printf("Reading %d bytes from %s\n", (int) buff . st_size, argv[1] );
 
 }
 
 void list()
 {
-	int i = 0;
+	int i, flag = 0;
 	
 
-	while(dir_ptr[i].name != NULL)
-	{
-		printf("%s \n", dir_ptr[i].name);
-		i++;
-	}
+	//while(dir_ptr[i].name != NULL)
+	//{
+	//	printf("%s \n", dir_ptr[i].name);
+	//	i++;
+	//}
+	//i = 0;
+	//for (i = 0; i < 10; i ++)
+	//{
+	//	printf("$$ %s \n", in_system[i]);
+	//}
+	printf("\n\n\n");
 
-	for (i = 0; i < 10; i ++)
-	{
-		printf("Dir_Entry[%d] = %s\n", i, dir_ptr[i].name);
-	}
-	
 	for (i = 0; i < 128; i ++)
+	{		
+		if(inode_array_ptr[i]->valid == 1)
+		{
+			flag = 1;
+			printf("%s ", dir_ptr[i].name);
+			printf("%d ", inode_array_ptr[i]->size);
+			printf("%s", ctime(&inode_array_ptr[i]->date));
+		}
+	}
+	printf("\n\n\n");
+
+
+	if (flag ==0)
 	{
-		printf("Inode[%d] = %d\n", i, inode_array_ptr[i]->valid);
+		printf("ERROR: No file in the system! \n");
+	}
+	
+	//for (i = 0; i < 10; i ++)
+	//{
+	//	printf("Inode[%d] = %d\n", i, inode_array_ptr[i]->valid);
+
+	//	if(inode_array_ptr[i]->valid == 1)
+	//	{
+	//		printf("Size: %d \n", inode_array_ptr[i]->size);
+	//		printf("Date: %s \n", ctime(&inode_array_ptr[i]->date));
+	//		int j;
+			//for(j = 0; j < 32; j++)
+			//{
+			//	printf("Blocks: %d \n", inode_array_ptr[i]->blocks[j]);
+			//}
+			
+			//printf("Blocks: %d \n", inode_array_ptr[i]->blocks);
+			//printf("Blocks: %d \n", inode_array_ptr[i]->blocks[12]);
+			//printf("Blocks: %d \n", inode_array_ptr[i]->blocks[20]);
+	//	}
+	//}
+
+	//for (i =0; i < 1000; i++)
+	//{
+	//	printf("Used Block[%d] = %d\n",i, used_blocks[i]);
+	//}
+
+}
+
+void del(char * filename)
+{	
+	int i, flag = 0;
+	for (i = 0; i < 10; i++)
+	{
+		//printf("in system[%d] = %s\n", i, in_system[i]);
+		if (strcmp(in_system[i], filename)==0)
+		{
+			//printf("Found what to delete\n");
+			//strcpy(dir_ptr[i].name, NULL);
+			inode_array_ptr[i]->valid = 0;
+			flag = 1;
+			strcpy(in_system[i],"");
+			break;
+		}
 	}
 
+	if (flag == 0)
+	{
+		printf("ERROR: File not found!\n");
+	}
 }
 
 int findFreeDirEntry()
 {
 	int i;
 	int retval = -1;
+	int counter = 0;
+
+	for(i = 0; i < 128; i++)
+	{
+		if(inode_array_ptr[i]->valid == 1)
+		{
+			counter ++;
+		}
+	}
 	
-	for (i = 0; i < 128; i++)
+	//printf("Counter == %d\n", counter);
+	if(counter == 127)
+	{
+		return retval;
+	}
+	/*for (i = 0; i < 128; i++)
 	{
 		printf("i == %d\n", i);
 		if(dir_ptr[i].valid == 0)
@@ -362,9 +490,9 @@ int findFreeDirEntry()
 		}
 	}
 
-	//printf(" ij 1\n");
+	//printf(" ij 1\n"); */
 
-	return retval;
+	return counter;
 }
 
 int findFreeInode()
@@ -418,7 +546,7 @@ void init()
 {
 	int i;
 	
-	dir_ptr = (struct dir_entry*) &data_blocks[0];
+	//dir_ptr = (struct dir_entry*) &data_blocks[0];
 
 	for (i = 0; i < NUM_FILES; i++)
 	{
