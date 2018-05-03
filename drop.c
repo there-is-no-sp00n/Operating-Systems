@@ -53,10 +53,12 @@ void put(char * filename);
 void list();
 void del(char * file);
 
-
+//created this char array to hold the original file names
+//sometimes when a file is put into the system, it will add some extra chars at the end of the filename
+//when files need to be deleted the names would not compare because of the extra chars
+//every index in this array will correspond to the same index of inode_array_ptr
+//if inode_array_pointer at index i is filled up then so will the corresponding index in this array
 char in_system[128][100];
-
-int in_sys_count = 0;
 
 int main()
 {
@@ -65,7 +67,7 @@ int main()
 
 	while(1)
 	{
-		printf("msh:> ");
+		printf("\nmsh:> ");
 
 		//checking to see whether or not fgets() failed
 		if(fgets(input, 100, stdin))
@@ -152,7 +154,7 @@ int main()
 			*/
 		}
 
-		int i;
+	//	int i;
 
 	/*	for(i = 0; i < 3; i++)
 		{
@@ -167,7 +169,12 @@ int main()
 		//printf("Free Space: %d bytes\n", df() );
 	
 
+
 		init();
+
+
+		//this portion here calls the respective functions based on the user input
+		//in some cases if the file names are not included they will spit out an error message
 		if(strcmp(fin[0], "put") == 0)
 		{
 			//printf("fin[1] == %s\n", fin[1]);
@@ -203,6 +210,16 @@ int main()
 				del(fin[1]);
 			}
 		}
+		
+		else if(strcmp(fin[0], "quit") == 0)
+		{
+			break;
+		}
+
+		else
+		{
+			printf("ERROR: no such command\n");
+		}
 
 
 	}
@@ -211,7 +228,7 @@ int main()
 	return 0;
 }
 
-
+//function calculates the amount of bytes remaining
 int df()
 {
 	int count = 0;
@@ -228,6 +245,8 @@ int df()
 	return count * BLOCK_SIZE;
 }
 
+
+//this function, for the most part, is from the video by Professor Bakker
 void put(char * filename)
 {
 	struct stat buff;
@@ -235,14 +254,20 @@ void put(char * filename)
 
 	int status = stat(filename, &buff);
 	
+	//if status is return as -1 that means the file does not exist
 	if(status == -1)
 	{
 		printf("ERROR: File not found \n");
 		return;
 	}
 
+	//this is what I added to the put(char *) function
+	//if the file is found then go through the in_system char array
+	//put the file name in the empty spot, and put in the same index in dir_ptr
+	//it'll also be put in the same index for inode
 	else
 	{
+		
 		int i;
 		for(i = 0; i < 128; i++)
 		{
@@ -257,12 +282,11 @@ void put(char * filename)
 			}
 		}
 
-		for(i = 0; i < 10; i++)
-		{
-			printf("put in system[%d] = %s\n", i, in_system[i]);
-		}
+		//for(i = 0; i < 10; i++)
+		//{
+		//	printf("put in system[%d] = %s\n", i, in_system[i]);
+		//}
 		
-		//in_sys_count ++;
 	}
 
 
@@ -374,6 +398,8 @@ void put(char * filename)
 
 }
 
+
+//this function prints out however many files are present in the file system
 void list()
 {
 	int i, flag = 0;
@@ -389,8 +415,9 @@ void list()
 	//{
 	//	printf("$$ %s \n", in_system[i]);
 	//}
-	printf("\n\n\n");
+	printf("\n\n");
 
+	//if the valid is 1 meaning that something is there, we print out the info
 	for (i = 0; i < 128; i ++)
 	{		
 		if(inode_array_ptr[i]->valid == 1)
@@ -401,12 +428,13 @@ void list()
 			printf("%s", ctime(&inode_array_ptr[i]->date));
 		}
 	}
-	printf("\n\n\n");
+	//printf("\n\n");
 
-
+	//if there are no valid == 1 meaning that the file system is empty, the flag will be still 0
+	//flag being 0 means that there are no files in the system
 	if (flag ==0)
 	{
-		printf("ERROR: No file in the system! \n");
+		printf("ERROR: No files in the system! \n");
 	}
 	
 	//for (i = 0; i < 10; i ++)
@@ -436,16 +464,25 @@ void list()
 
 }
 
+//this the function that deletes files from the program
 void del(char * filename)
 {	
+	//go through the in_system array bc it holds the name as given by the user when it was put
+	//not comparing with the dir_ptr.name bc it may contain some extra chars
 	int i, flag = 0;
-	for (i = 0; i < 10; i++)
+	for (i = 0; i < 128; i++)
 	{
 		//printf("in system[%d] = %s\n", i, in_system[i]);
 		if (strcmp(in_system[i], filename)==0)
 		{
 			//printf("Found what to delete\n");
 			//strcpy(dir_ptr[i].name, NULL);
+
+
+			//if a file name matches, then set the valid to 0
+			//and copy a blank to that index in in_system
+			//next time this 0 is encountered in the inode_array_ptr.valid,
+			//the metadatas will be overwritten with the info retrieved from the new file
 			inode_array_ptr[i]->valid = 0;
 			flag = 1;
 			strcpy(in_system[i],"");
@@ -453,18 +490,23 @@ void del(char * filename)
 		}
 	}
 
+	//if flag is unchanged, that means the file does not exist
 	if (flag == 0)
 	{
 		printf("ERROR: File not found!\n");
 	}
 }
 
+//given by Professor Bakker, but I made a slight adjustment
 int findFreeDirEntry()
 {
 	int i;
 	int retval = -1;
 	int counter = 0;
-
+	
+	//I could not figure out why, but dir_ptr would only populate the first index
+	//adding a second, third file would just overwrite the file at index 0
+	//due to this reason I would check the inode_array_ptr for indicators of availability
 	for(i = 0; i < 128; i++)
 	{
 		if(inode_array_ptr[i]->valid == 1)
@@ -474,6 +516,8 @@ int findFreeDirEntry()
 	}
 	
 	//printf("Counter == %d\n", counter);
+
+	//if no empty spaces encountered, then return -1
 	if(counter == 127)
 	{
 		return retval;
@@ -495,6 +539,7 @@ int findFreeDirEntry()
 	return counter;
 }
 
+//every function written below this comment was provided by Professor Bakker
 int findFreeInode()
 {
 	int i;
